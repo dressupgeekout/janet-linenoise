@@ -176,7 +176,7 @@ j_linenoiseSetCompletionCallback(int32_t argc, Janet *argv)
 {
 	janet_fixarity(argc, 1);
 	JanetFunction *fn = janet_getfunction(argv, 0);
-	linenoiseSetCompletionCallback(real_completion_cb, fn); 
+	linenoiseSetCompletionCallback(real_completion_cb, fn);
 	return janet_wrap_nil();
 }
 

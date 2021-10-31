@@ -23,7 +23,7 @@
 (linenoise/clear-screen)
 
 (loop [line :iterate (linenoise/linenoise PROMPT)]
-  (cond 
+  (cond
     (= (string/ascii-lower line) "quit")
       (break)
     (do
