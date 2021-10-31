@@ -17,6 +17,8 @@ static Janet j_linenoiseHistorySave(int32_t argc, Janet *argv);
 static Janet j_linenoiseHistoryLoad(int32_t argc, Janet *argv);
 static Janet j_linenoiseClearScreen(int32_t argc, Janet *argv);
 static Janet j_linenoiseSetMultiLine(int32_t argc, Janet *argv);
+static Janet j_linenoiseSetCompletionCallback(int32_t argc, Janet *argv);
+static Janet j_linenoiseAddCompletion(int32_t argc, Janet *argv);
 
 static const JanetReg functions[] = {
 	{
@@ -65,6 +67,16 @@ static const JanetReg functions[] = {
 		j_linenoiseSetMultiLine,
 		"(linenoise/set-multi-line boolean)\n\n"
 		"Set if to use or not the multi line mode."
+	},
+	{
+		"set-completion-callback",
+		j_linenoiseSetCompletionCallback,
+		"(linenoise/set-completion-callback fn)\n\n"
+	},
+	{
+		"add-completion",
+		j_linenoiseAddCompletion,
+		"(linenoise/add-completion list completions)\n\n"
 	},
 	{NULL, NULL, NULL}
 };
@@ -147,8 +159,47 @@ j_linenoiseSetMultiLine(int32_t argc, Janet *argv)
 	return janet_wrap_nil();
 }
 
+
+/* LINENOISE-COMPLETION is supposed to call into linenoiseAddCompletion at some point. */
+// XXX I guess 'core' isn't the right env after all 
+static void
+real_completion_cb(const char *buf, linenoiseCompletions *lc)
+{
+	JanetFunction *completion_cb = janet_unwrap_function(janet_resolve_core("LINENOISE-COMPLETION"));
+
+	Janet argv[] = {
+		janet_wrap_string(janet_cstring(buf)),
+		janet_wrap_pointer(lc)
+	};
+	janet_call(completion_cb, 2, argv);
+}
+
+
+// XXX we get it by default, is that a problem?
+//
+// The problem is, I really just can't invent a C function out of thin air, can I?
+static Janet
+j_linenoiseSetCompletionCallback(int32_t argc, Janet *argv)
+{
+	linenoiseSetCompletionCallback(real_completion_cb); 
+	return janet_wrap_nil();
+}
+
+
+/* (linenoise/add-completion lc string) */
+static Janet
+j_linenoiseAddCompletion(int32_t argc, Janet *argv)
+{
+	janet_fixarity(argc, 2);
+	linenoiseCompletions *lc = janet_getpointer(argv, 0);
+	const char *completion = janet_getcstring(argv, 1);
+	linenoiseAddCompletion(lc, completion);
+	return janet_wrap_nil();
+}
+
 /* ********** */
 
-JANET_MODULE_ENTRY(JanetTable *env) {
+JANET_MODULE_ENTRY(JanetTable *env)
+{
 	janet_cfuns(env, "linenoise", functions);
 }
