@@ -39,8 +39,7 @@ static const JanetReg functions[] = {
 		"It uses a fixed array of char pointers that are shifted (memmoved) "
 		"when the history max length is reached in order to remove the older "
 		"entry and make room for the new one, so it is not exactly suitable for huge "
-		"histories, but will work well for a few hundred of entries.\n\n"
-		"Using a circular buffer is smarter, but a bit more complex to handle."
+		"histories, but will work well for a few hundred of entries."
 	},
 	{
 		"history-set-max-len",
@@ -72,11 +71,15 @@ static const JanetReg functions[] = {
 		"set-completion-callback",
 		j_linenoiseSetCompletionCallback,
 		"(linenoise/set-completion-callback fn)\n\n"
+		"The function should accept two parameters. The first is an opaque C pointer which "
+		"is the line-completions object. The second is the line buffer which the user "
+		"has typed thus far. The function should add 1 or more completions accordingly, "
+		"with linenoise/add-completion."
 	},
 	{
 		"add-completion",
 		j_linenoiseAddCompletion,
-		"(linenoise/add-completion list completions)\n\n"
+		"(linenoise/add-completion lc string)\n\n"
 	},
 	{NULL, NULL, NULL}
 };
@@ -161,13 +164,13 @@ j_linenoiseSetMultiLine(int32_t argc, Janet *argv)
 
 
 static void
-real_completion_cb(const char *buf, linenoiseCompletions *lc, JanetFunction *cb)
+real_completion_cb(const char *buf, linenoiseCompletions *lc, void *cb)
 {
 	Janet argv[] = {
 		janet_wrap_pointer(lc),
 		janet_wrap_string(janet_cstring(buf)),
 	};
-	janet_call(cb, 2, argv);
+	janet_call((JanetFunction *)cb, 2, argv);
 }
 
 
@@ -176,12 +179,11 @@ j_linenoiseSetCompletionCallback(int32_t argc, Janet *argv)
 {
 	janet_fixarity(argc, 1);
 	JanetFunction *fn = janet_getfunction(argv, 0);
-	linenoiseSetCompletionCallback(real_completion_cb, fn);
+	linenoiseSetCompletionCallback(real_completion_cb, (void *)fn);
 	return janet_wrap_nil();
 }
 
 
-/* (linenoise/add-completion lc string) */
 static Janet
 j_linenoiseAddCompletion(int32_t argc, Janet *argv)
 {
