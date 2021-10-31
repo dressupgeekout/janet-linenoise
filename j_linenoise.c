@@ -160,28 +160,23 @@ j_linenoiseSetMultiLine(int32_t argc, Janet *argv)
 }
 
 
-/* LINENOISE-COMPLETION is supposed to call into linenoiseAddCompletion at some point. */
-// XXX I guess 'core' isn't the right env after all 
 static void
-real_completion_cb(const char *buf, linenoiseCompletions *lc)
+real_completion_cb(const char *buf, linenoiseCompletions *lc, JanetFunction *cb)
 {
-	JanetFunction *completion_cb = janet_unwrap_function(janet_resolve_core("LINENOISE-COMPLETION"));
-
 	Janet argv[] = {
+		janet_wrap_pointer(lc),
 		janet_wrap_string(janet_cstring(buf)),
-		janet_wrap_pointer(lc)
 	};
-	janet_call(completion_cb, 2, argv);
+	janet_call(cb, 2, argv);
 }
 
 
-// XXX we get it by default, is that a problem?
-//
-// The problem is, I really just can't invent a C function out of thin air, can I?
 static Janet
 j_linenoiseSetCompletionCallback(int32_t argc, Janet *argv)
 {
-	linenoiseSetCompletionCallback(real_completion_cb); 
+	janet_fixarity(argc, 1);
+	JanetFunction *fn = janet_getfunction(argv, 0);
+	linenoiseSetCompletionCallback(real_completion_cb, fn); 
 	return janet_wrap_nil();
 }
 

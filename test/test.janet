@@ -4,12 +4,12 @@
 
 (defn LINENOISE-COMPLETION
   "This is the only way I know how to hook into things."
-  [lc str]
+  [lc buf]
   (linenoise/add-completion lc "foo")
   (linenoise/add-completion lc "bar")
   (linenoise/add-completion lc "baz"))
 
-(linenoise/set-completion-callback)
+(linenoise/set-completion-callback LINENOISE-COMPLETION)
 
 (def PROMPT "app> ")
 (def HISTORY-FILE "/tmp/history.txt")

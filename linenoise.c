@@ -121,6 +121,7 @@
 #define LINENOISE_MAX_LINE 4096
 static char *unsupported_term[] = {"dumb","cons25","emacs",NULL};
 static linenoiseCompletionCallback *completionCallback = NULL;
+static void *completionCallbackExtra = NULL;
 static linenoiseHintsCallback *hintsCallback = NULL;
 static linenoiseFreeHintsCallback *freeHintsCallback = NULL;
 
@@ -366,7 +367,7 @@ static int completeLine(struct linenoiseState *ls) {
     int nread, nwritten;
     char c = 0;
 
-    completionCallback(ls->buf,&lc);
+    completionCallback(ls->buf,&lc, completionCallbackExtra);
     if (lc.len == 0) {
         linenoiseBeep();
     } else {
@@ -420,8 +421,9 @@ static int completeLine(struct linenoiseState *ls) {
 }
 
 /* Register a callback function to be called for tab-completion. */
-void linenoiseSetCompletionCallback(linenoiseCompletionCallback *fn) {
+void linenoiseSetCompletionCallback(linenoiseCompletionCallback *fn, void *extra) {
     completionCallback = fn;
+		completionCallbackExtra = extra;
 }
 
 /* Register a hits function to be called to show hits to the user at the
