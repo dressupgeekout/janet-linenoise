@@ -18,35 +18,54 @@ static Janet j_linenoiseHistoryLoad(int32_t argc, Janet *argv);
 static Janet j_linenoiseClearScreen(int32_t argc, Janet *argv);
 static Janet j_linenoiseSetMultiLine(int32_t argc, Janet *argv);
 
-#define J_LINENOISE_DOC	\
-	"The high level function that is the main API of the linenoise library. "			\
-	"This function checks if the terminal has basic capabilities, just checking "	\
-	"for a blacklist of stupid terminals, and later either calls the line "				\
-	"editing function or uses dummy fgets() so that you will be able to type "		\
-	"something even in the most desperate of the conditions."
-
-#define J_LINENOISEHISTORYADD_DOC \
-	"This is the API call to add a new entry in the linenoise history. "							\
-	"It uses a fixed array of char pointers that are shifted (memmoved) "							\
-	"when the history max length is reached in order to remove the older "						\
-	"entry and make room for the new one, so it is not exactly suitable for huge "		\
-	"histories, but will work well for a few hundred of entries.\n\n"									\
-	"Using a circular buffer is smarter, but a bit more complex to handle."	
-
-#define J_LINENOISESETMULTILINE_DOC \
-	"Set if to use or not the multi line mode."
-
-#define NODOC \
-	""
-
 static const JanetReg functions[] = {
-	{"linenoise", j_linenoise, "(linenoise/linenoise prompt)\n\n" J_LINENOISE_DOC},
-	{"history-add", j_linenoiseHistoryAdd, "(linenoise/history-add line)\n\n" J_LINENOISEHISTORYADD_DOC},
-	{"history-set-max-len", j_linenoiseHistorySetMaxLen, "(linenoise/history-set-max-len n)\n\n" NODOC},
-	{"history-save", j_linenoiseHistorySave, "(linenoise/history-save filename)\n\n" NODOC},
-	{"history-load", j_linenoiseHistoryLoad, "(linenoise/history-load filename)\n\n" NODOC},
-	{"clear-screen", j_linenoiseClearScreen, "(linenoise/clear-screen)\n\n" NODOC},
-	{"set-multi-line", j_linenoiseSetMultiLine, "(linenoise/set-multi-line boolean)\n\n" J_LINENOISESETMULTILINE_DOC},
+	{
+		"linenoise",
+		j_linenoise,
+		"(linenoise/linenoise prompt)\n\n"
+		"The high level function that is the main API of the linenoise library. "
+		"This function checks if the terminal has basic capabilities, just checking "
+		"for a blacklist of stupid terminals, and later either calls the line "
+		"editing function or uses dummy fgets() so that you will be able to type "
+		"something even in the most desperate of the conditions."
+	},
+	{
+		"history-add",
+		j_linenoiseHistoryAdd,
+		"(linenoise/history-add line)\n\n"
+		"This is the API call to add a new entry in the linenoise history. "
+		"It uses a fixed array of char pointers that are shifted (memmoved) "
+		"when the history max length is reached in order to remove the older "
+		"entry and make room for the new one, so it is not exactly suitable for huge "
+		"histories, but will work well for a few hundred of entries.\n\n"
+		"Using a circular buffer is smarter, but a bit more complex to handle."
+	},
+	{
+		"history-set-max-len",
+		j_linenoiseHistorySetMaxLen,
+		"(linenoise/history-set-max-len n)\n\n"
+	},
+	{
+		"history-save",
+		j_linenoiseHistorySave,
+		"(linenoise/history-save filename)\n\n"
+	},
+	{
+		"history-load",
+		j_linenoiseHistoryLoad,
+		"(linenoise/history-load filename)\n\n"
+	},
+	{
+		"clear-screen",
+		j_linenoiseClearScreen,
+		"(linenoise/clear-screen)\n\n"
+	},
+	{
+		"set-multi-line",
+		j_linenoiseSetMultiLine,
+		"(linenoise/set-multi-line boolean)\n\n"
+		"Set if to use or not the multi line mode."
+	},
 	{NULL, NULL, NULL}
 };
 
